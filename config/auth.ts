@@ -3,8 +3,14 @@ import { Strategy as LocalStrategy } from 'passport-local';
 import bcrypt from 'bcrypt';
 import pool from '../db/pool';
 
+type User = {
+  id: number;
+  email: string;
+  password_hash: string;
+};
+
 passport.use(new LocalStrategy(
-  { usernameField: 'email' }, // if using email instead of username
+  { usernameField: 'email' },
   async (email, password, done) => {
     try {
       const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
@@ -22,3 +28,16 @@ passport.use(new LocalStrategy(
   }
 ));
 
+// ✅ These go outside the strategy definition
+passport.serializeUser((user: any, done) => {
+  done(null, (user as { id: number }).id);
+});
+passport.deserializeUser(async (id, done) => {
+  try {
+    const result = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
+    const user = result.rows[0];
+    done(null, user);
+  } catch (err) {
+    done(err);
+  }
+});
