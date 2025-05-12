@@ -14,7 +14,9 @@ const LoginForm = () => {
 
     try {
       await login(email, password);
-      navigate('/');
+      setTimeout(() => {
+        navigate('/');
+      }, 100)
     } catch (err: any) {
       if (err.response?.status === 401) {
         setError('Invalid credentials');

@@ -14,6 +14,9 @@ const client = new Client({
 
 async function main() {
   try {
+
+    // await client.query(`DROP TABLE IF EXISTS messages`);
+    // await client.query(`DROP TABLE IF EXISTS users`);
     await client.connect();
     // Create Tables
     await client.query(`
@@ -23,6 +26,7 @@ async function main() {
         email TEXT NOT NULL UNIQUE,
         password_hash TEXT NOT NULL,
         role TEXT NOT NULL DEFAULT 'user',
+        status TEXT NOT NULL DEFAULT 'pending',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     
@@ -36,10 +40,10 @@ async function main() {
     const password = 'password';
     const hashedPassword = await bcrypt.hash(password, 10);
     const { rows } = await client.query(`
-    INSERT INTO users (username, email, password_hash, role)
-    VALUES ($1, $2, $3, $4)
+    INSERT INTO users (username, email, password_hash, role, status)
+    VALUES ($1, $2, $3, $4, $5)
     RETURNING id
-  `, ['Adnan', 'adnanchowdhury7249@gmail.com', hashedPassword, 'superadmin']);
+  `, ['Adnan', 'adnanchowdhury7249@gmail.com', hashedPassword, 'admin', 'approved']);
 
     const superAdminId = rows[0].id;
 
@@ -47,7 +51,7 @@ async function main() {
     INSERT INTO messages (user_id, content)
     VALUES 
     ($1, 'Welcome to the secret board!'),
-    ($1, 'This is a message from Super Admin.');
+    ($1, 'This is a message from Admin.');
   `, [superAdminId]);
 
     console.log(' Tables created and seeded with superadmin + messages.');

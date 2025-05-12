@@ -21,6 +21,10 @@ passport.use(new LocalStrategy(
       const match = await bcrypt.compare(password, user.password_hash);
       if (!match) return done(null, false, { message: 'Incorrect email or password.' });
 
+      if (user.status !== 'approved') {
+        return done(null, false, { message: 'Account not yet approved by admin.' });
+      }
+
       return done(null, user);
     } catch (err) {
       return done(err);
@@ -28,7 +32,7 @@ passport.use(new LocalStrategy(
   }
 ));
 
-// ✅ These go outside the strategy definition
+
 passport.serializeUser((user: any, done) => {
   done(null, (user as { id: number }).id);
 });
